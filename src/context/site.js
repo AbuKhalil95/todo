@@ -8,7 +8,7 @@ function SiteProvider(props) {
     const [numItems, setNumItems] = useState(3);
     const [sortType, setSortType] = useState('difficulty');
 
-    const state = {
+    const context = {
         showCompleted, 
         numItems, 
         sortType,
@@ -17,8 +17,12 @@ function SiteProvider(props) {
         setSortType
     }
 
+    function toggleShow() {
+        setShowCompleted(!showCompleted);
+    }
+
     return (
-        <SiteContext.Provider value={state}>
+        <SiteContext.Provider value={{context, toggleShow}}>
             {props.children}
         </SiteContext.Provider>
     )

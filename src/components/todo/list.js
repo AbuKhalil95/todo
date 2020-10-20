@@ -11,16 +11,18 @@ import Toast from 'react-bootstrap/Toast';
 import Pagination from 'react-bootstrap/Pagination'
 
 const TodoList = (props) => {
-    const context = useContext(SiteContext);
+    const {context, toggleShow} = useContext(SiteContext);
     const [active, setActive] = useState(1);
+    const [showCompleted, toggleCompleted] = useState(context.showCompleted);
     let start = ((active - 1) * context.numItems);
     let end = context.numItems + ((active - 1) * context.numItems);
     let list = props.list.slice(start ,end);
     let pageList = [];
+    
     const handlePagination = (e) =>{
-      console.log(e.target.text)
       setActive(Number(e.target.text));
     }
+
     for (let i = 1; i <= Math.ceil(props.list.length / context.numItems); i++) {
       pageList.push(
         <Pagination.Item key={i} active={i === active} disabled={i === active} onClick ={handlePagination} >
@@ -29,8 +31,21 @@ const TodoList = (props) => {
       );
     }
 
+    useEffect(() => {
+      console.log('toggling locally')
+      toggleCompleted(!showCompleted);
+    }, [context])
+
   return (
     <ListGroup>
+      <div className='custom-control custom-switch'>
+        <input type='checkbox' className='custom-control-input' id='customSwitches' readOnly
+        onChange={toggleShow}
+        />
+        <label className='custom-control-label' htmlFor='customSwitches'>
+          {showCompleted ? "  Without completed" : "  With completed"}
+          </label>
+      </div>
       {list.map(item => (
         <ListGroup.Item
         className={`complete-${item.complete}`}

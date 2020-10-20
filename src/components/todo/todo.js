@@ -14,7 +14,7 @@ import Col from 'react-bootstrap/Col';
 const todoAPI = 'https://abukhalil-api-backend.herokuapp.com/api/v1/todo';
 
 const ToDo = (props) => {
-  const context = useContext(SiteContext);
+  const {context, toggleShow} = useContext(SiteContext);
 
   const [list, setList] = useState([]);
   const [updateList, startUpdateList] = useState([]);
@@ -52,7 +52,7 @@ const ToDo = (props) => {
     startUpdateList(list.map((listItem, index) => listItem._id === item._id ? list.splice(index, 1) : listItem))
   }
 
-  useEffect(() => {
+  useEffect(() => {   // read from API storage once
     read().then(results => {
       let newList = results.data.results.filter( i => {
         return context.showCompleted ? i : i.complete === context.showCompleted
@@ -63,9 +63,14 @@ const ToDo = (props) => {
     });
   }, []);
 
-  useEffect(() => {
-    setList(updateList);
-  }, [updateList]);
+  useEffect(() => { // re-render after changes detected
+    let newList = updateList.filter( i => {
+      return context.showCompleted ? i : i.complete === context.showCompleted
+    });
+
+    newList = newList.sort((a, b) => (a[context.sortType] > b[context.sortType]) ? 1 : -1);
+    setList(newList);
+  }, [updateList, context]);
 
     return (
       <>
