@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useContext } from 'react';
 import TodoForm from './form.js';
 import TodoList from './list.js';
+import useAjax from '../../hooks/useAjax';
 import './todo.scss';
+import { SiteContext } from '../../context/site.js';
 
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
@@ -9,78 +11,102 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-const ToDo = (props) => {
-  const [list, addList] = useState([]);
+const todoAPI = 'https://abukhalil-api-backend.herokuapp.com/api/v1/todo';
 
-  const addItem = (item) => {
-    item._id = Math.random();
+const ToDo = (props) => {
+  const {context, toggleShow} = useContext(SiteContext);
+
+  const [list, setList] = useState([]);
+  const [updateList, startUpdateList] = useState([]);
+
+  const [create, read, update, remove] = useAjax(todoAPI);
+
+  const addItem = async (item) => {
+    item.due = new Date();
     item.complete = false;
-    addList([...list, item]);
+    console.log(item);
+    create(item)
+      .then(results => {
+        console.log(results);
+        startUpdateList([...list, results.data.results])
+      })
+      .catch(console.error);
   };
 
-  const toggleComplete = id => {
-    console.log('handling toggle');
+  const toggleComplete = async (id) => {
     let item = list.filter(i => i._id === id)[0] || {};
-
     if (item._id) {
       item.complete = !item.complete;
-      let newList = list.map(listItem => listItem._id === item._id ? item : listItem);
-      addList(newList);
+      update(item, item._id)
+      .then((result) => {
+        console.log(result);
+        startUpdateList(list.map(listItem => listItem._id === item._id ? item : listItem))
+      })
     }
-    console.log(list);
   };
 
-  useEffect(() => {
-    let list = [
-      { _id: 1, complete: false, text: 'Clean the Kitchen', difficulty: 3, assignee: 'Person A'},
-      { _id: 2, complete: false, text: 'Do the Laundry', difficulty: 2, assignee: 'Person A'},
-      { _id: 3, complete: false, text: 'Walk the Dog', difficulty: 4, assignee: 'Person B'},
-      { _id: 4, complete: true, text: 'Do Homework', difficulty: 3, assignee: 'Person C'},
-      { _id: 5, complete: false, text: 'Take a Nap', difficulty: 1, assignee: 'Person B'},
-    ];
+  const deleteItem = async (id) => {
+    let item = list.filter(i => i._id === id)[0] || {};
+    console.log('removing: ', id);
+    await remove(id);
+    startUpdateList(list.map((listItem, index) => listItem._id === item._id ? list.splice(index, 1) : listItem))
+  }
 
-    addList(list);
-  }, [])
+  useEffect(() => {   // read from API storage once
+    read().then(results => {
+      let newList = results.data.results.filter( i => {
+        return context.showCompleted ? i : i.complete === context.showCompleted
+      });
+
+      newList = newList.sort((a, b) => (a[context.sortType] > b[context.sortType]) ? 1 : -1);
+      startUpdateList(newList);
+    });
+  }, []);
+
+  useEffect(() => { // re-render after changes detected
+    let newList = updateList.filter( i => {
+      return context.showCompleted ? i : i.complete === context.showCompleted
+    });
+
+    newList = newList.sort((a, b) => (a[context.sortType] > b[context.sortType]) ? 1 : -1);
+    setList(newList);
+  }, [updateList, context]);
 
     return (
       <>
         <header>
-          <Row>
-            <Col>
-              <Navbar bg="dark" variant="dark">
-                <Navbar.Brand href="#home">React</Navbar.Brand>
-                <Nav className="mr-auto">
-                  <Nav.Link href="#home">Home</Nav.Link>
-                </Nav>
-              </Navbar>
-            </Col>
-          </Row>
-          <Container as="nav">
-            <Row>
-              <Col>
-                <Navbar bg="info" variant="secondary">
-                  <section className="title">
-                    <h2>
-                      To Do List Manager ({list.filter(item => !item.complete).length})
-                    </h2>
-                  </section>
-                </Navbar>
-              </Col>
-            </Row>
-          </Container>
+          <Navbar bg="dark" variant="dark">
+            <Navbar.Brand href="#">React</Navbar.Brand>
+            <Nav className="mr-auto">
+              <Nav.Link href="#">Home</Nav.Link>
+            </Nav>
+          </Navbar>
         </header>
         
         <Container as="nav">
+          <Row>
+            <Col>
+              <Navbar bg="info" variant="secondary">
+                <section className="title">
+                  <h2>
+                    To Do List Manager ({list.filter(item => !item.complete).length})
+                  </h2>
+                </section>
+              </Navbar>
+            </Col>
+          </Row>
+        </Container>
+        <Container>
           <Row>
             <section className="todo">
               <Col sm={4}>
                 <TodoForm handleSubmit={addItem} />
               </Col>
-              <Col></Col>
+              <Col sm={1}></Col>
               <Col sm={6}>
-                <TodoList list={list} handleComplete={toggleComplete}/>
+                <TodoList list={list} handleComplete={toggleComplete} handleDelete={deleteItem}/>
               </Col>
-              <Col sm={3}></Col>        
+              <Col sm={3}></Col>
             </section>
           </Row>
         </Container>
