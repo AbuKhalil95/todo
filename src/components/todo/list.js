@@ -8,7 +8,7 @@ const TodoList = (props) => {
       <ListGroup>
         {props.list.map(item => (
           <ListGroup.Item action variant={!item.complete ? "success" : "danger"}
-          className={`complete-${item.complete.toString()}`}
+          className={`complete-${item.complete}`}
           key={item._id}
           onClick={() => props.handleComplete(item._id)}>
             <span style={{textDecorationLine: item.complete ? 'line-through': "none"}}>
