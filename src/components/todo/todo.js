@@ -14,57 +14,35 @@ const todoAPI = 'https://abukhalil-api-backend.herokuapp.com/api/v1/todo';
 
 const ToDo = (props) => {
   const [list, setList] = useState([]);
-  const { data, isLoading, hasError, errorMessage } = useAjax(todoAPI)
+  const [create, read, update, remove] = useAjax(todoAPI);
 
-  const addItem = (item) => {
+  const addItem = async (item) => {
     item.due = new Date();
-    fetch(todoAPI, {
-      method: 'post',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    })
-      .then(response => response.json())
-      .then(savedItem => {
-        setList([...list, savedItem])
+    create(item)
+      .then(results => {
+        setList([...list, results.data.results])
       })
       .catch(console.error);
   };
 
-  const toggleComplete = id => {
-
+  const toggleComplete = async (id) => {
     let item = list.filter(i => i._id === id)[0] || {};
-
     if (item._id) {
-
       item.complete = !item.complete;
-
-      let url = `${todoAPI}/${id}`;
-
-      fetch(url, {
-        method: 'put',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item)
+      update(JSON.stringify(item), item._id)
+      .then((result) => {
+        console.log(result);
+        setList(list.map(listItem => listItem._id === item._id ? item : listItem))
       })
-        .then(response => response.json())
-        .then(savedItem => {
-          setList(list.map(listItem => listItem._id === item._id ? item : listItem));
-        })
-        .catch(console.error);
     }
   };
 
-  // const getTodoItems = () => {
 
-  //     .then(data => data.json())
-  //     .then(data => setList(data.results))
-  //     .catch(console.error);
-  // };
-
-  // useEffect(getTodoItems, []);
+  useEffect(() => {
+    read().then(results => {
+      setList(results.data.results);
+    });
+  }, []);
 
     return (
       <>

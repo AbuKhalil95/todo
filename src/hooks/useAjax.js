@@ -1,26 +1,26 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const useAjax = (url) => {
-  const [data, setData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchData = () => {
-      setIsLoading(true);
-      fetch(todoAPI, 
-        {
-          method: 'get', 
-          mode: 'cors',
-        })
-        .then(data => data.json())
-        .then(data => setData(data));
-      setIsLoading(false);
-    }
-    
-    fetchData();
-  }, [])
+  const create = (data) => {
+    console.log(data);
+    return axios.post(url, { data })
+  }
 
-  return { data, isLoading }
+  const read = async () => {
+    return await axios.get(url);
+  }
+
+  const update = (data, id) => {
+    return axios.put(url + '/' + id, { data });
+  }
+
+  const remove = (id) => {
+    return axios.delete(url + '/' + id);
+  }
+
+  return [create, read, update, remove];
 }
 
 export default useAjax;
