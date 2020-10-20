@@ -1,23 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState, useContext} from 'react';
 
 import ListGroup from 'react-bootstrap/ListGroup';
+import {SiteContext} from '../../context/site.js';
+
+import Card from 'react-bootstrap/Card';
+import Button from 'react-bootstrap/Button';
+import Badge from 'react-bootstrap/Badge';
+import Modal from 'react-bootstrap/Modal';
+import Toast from 'react-bootstrap/Toast';
+import Pagination from 'react-bootstrap/Pagination'
 
 const TodoList = (props) => {
+    const context = useContext(SiteContext);
+    const [active, setActive] = useState(1);
+    let start = ((active - 1) * context.numItems);
+    let end = context.numItems + ((active - 1) * context.numItems);
+    let list = props.list.slice(start ,end);
+    let pageList = [];
+    const handlePagination = (e) =>{
+      console.log(e.target.text)
+      setActive(Number(e.target.text));
+    }
+    for (let i = 1; i <= Math.ceil(props.list.length / context.numItems); i++) {
+      pageList.push(
+        <Pagination.Item key={i} active={i === active} disabled={i === active} onClick ={handlePagination} >
+          {i}
+        </Pagination.Item>
+      );
+    }
 
-    return (
-      <ListGroup>
-        {props.list.map(item => (
-          <ListGroup.Item action variant={!item.complete ? "success" : "danger"}
-          className={`complete-${item.complete}`}
-          key={item._id}
-          onClick={() => props.handleComplete(item._id)}>
-            <span style={{textDecorationLine: item.complete ? 'line-through': "none"}}>
-              {item.text}
-            </span>          
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
-    );
+  return (
+    <ListGroup>
+      {list.map(item => (
+        <ListGroup.Item
+        className={`complete-${item.complete}`}
+        key={item._id}>
+          <Toast onClose={() => props.handleDelete(item._id)} onClick={() => props.handleComplete(item._id)}>
+            <Toast.Header>
+              <Badge pill variant={!item.complete ? "success" : "danger"}>{!item.complete ? "Pending" : "Complete"}</Badge>{' '}
+              <strong className="mr-auto">{item.assignee}</strong>
+              <small>11 mins ago</small>
+            </Toast.Header>
+            <Toast.Body>
+              <span style={{textDecorationLine: item.complete ? 'line-through': "none"}}>
+                {item.text}
+              </span>
+              <small>Difficulty: {item.difficulty}</small>
+            </Toast.Body>
+          </Toast>
+        </ListGroup.Item>
+      ))}
+      <Pagination>{pageList}</Pagination>   
+    </ListGroup>
+  );
 
 }
 

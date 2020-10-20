@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useContext } from 'react';
 import TodoForm from './form.js';
 import TodoList from './list.js';
 import useAjax from '../../hooks/useAjax';
 import './todo.scss';
+import { SiteContext } from '../../context/site.js';
 
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
@@ -13,14 +14,21 @@ import Col from 'react-bootstrap/Col';
 const todoAPI = 'https://abukhalil-api-backend.herokuapp.com/api/v1/todo';
 
 const ToDo = (props) => {
+  const context = useContext(SiteContext);
+
   const [list, setList] = useState([]);
+  const [updateList, startUpdateList] = useState([]);
+
   const [create, read, update, remove] = useAjax(todoAPI);
 
   const addItem = async (item) => {
     item.due = new Date();
+    item.complete = false;
+    console.log(item);
     create(item)
       .then(results => {
-        setList([...list, results.data.results])
+        console.log(results);
+        startUpdateList([...list, results.data.results])
       })
       .catch(console.error);
   };
@@ -29,20 +37,35 @@ const ToDo = (props) => {
     let item = list.filter(i => i._id === id)[0] || {};
     if (item._id) {
       item.complete = !item.complete;
-      update(JSON.stringify(item), item._id)
+      update(item, item._id)
       .then((result) => {
         console.log(result);
-        setList(list.map(listItem => listItem._id === item._id ? item : listItem))
+        startUpdateList(list.map(listItem => listItem._id === item._id ? item : listItem))
       })
     }
   };
 
+  const deleteItem = async (id) => {
+    let item = list.filter(i => i._id === id)[0] || {};
+    console.log('removing: ', id);
+    await remove(id);
+    startUpdateList(list.map((listItem, index) => listItem._id === item._id ? list.splice(index, 1) : listItem))
+  }
 
   useEffect(() => {
     read().then(results => {
-      setList(results.data.results);
+      let newList = results.data.results.filter( i => {
+        return context.showCompleted ? i : i.complete === context.showCompleted
+      });
+
+      newList = newList.sort((a, b) => (a[context.sortType] > b[context.sortType]) ? 1 : -1);
+      startUpdateList(newList);
     });
   }, []);
+
+  useEffect(() => {
+    setList(updateList);
+  }, [updateList]);
 
     return (
       <>
@@ -74,11 +97,11 @@ const ToDo = (props) => {
               <Col sm={4}>
                 <TodoForm handleSubmit={addItem} />
               </Col>
-              <Col></Col>
+              <Col sm={1}></Col>
               <Col sm={6}>
-                <TodoList list={list} handleComplete={toggleComplete}/>
+                <TodoList list={list} handleComplete={toggleComplete} handleDelete={deleteItem}/>
               </Col>
-              <Col sm={3}></Col>        
+              <Col sm={3}></Col>
             </section>
           </Row>
         </Container>

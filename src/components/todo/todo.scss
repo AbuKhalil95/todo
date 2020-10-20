@@ -13,11 +13,41 @@ nav.container {
     width: 100%;
     display:flex;
     flex-direction:row;
+
     form {
         padding: 10px;
         border-radius: 10px;
+
         label {
             margin-bottom: 1em;
         }
     }
 }
+.list-group-item {
+    padding: 0;
+    background-color: #fff;
+    border: 0px;
+
+
+    .toast {    
+        max-height: 120px;
+        max-width: 1000px;
+        margin-bottom: 1.5em;
+        cursor: pointer;
+
+        .toast-header {
+            strong {
+                margin-left: 1em;
+            }
+        }
+
+        .toast-body {
+
+            small {
+                display: flex;
+                justify-content: flex-end;
+            }
+        }
+    }
+}
+

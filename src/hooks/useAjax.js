@@ -3,21 +3,21 @@ import axios from 'axios';
 
 const useAjax = (url) => {
 
-  const create = (data) => {
+  const create = async (data) => {
     console.log(data);
-    return axios.post(url, { data })
+    return await axios.post(url, data)
   }
 
   const read = async () => {
     return await axios.get(url);
   }
 
-  const update = (data, id) => {
-    return axios.put(url + '/' + id, { data });
+  const update = async (data, id) => {
+    return await axios.put(url + '/' + id, data);
   }
 
-  const remove = (id) => {
-    return axios.delete(url + '/' + id);
+  const remove = async (id) => {
+    return await axios.delete(url + '/' + id);
   }
 
   return [create, read, update, remove];
