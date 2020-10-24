@@ -15,7 +15,7 @@ class AuthProvider extends React.Component {
       logout: this.logout,
       user: {},
       isValidAction: this.isValidAction,
-      API: 'http://jadwalla.herokuapp.com',
+      API: 'https://jadwalla.herokuapp.com',
     };
 
   }
