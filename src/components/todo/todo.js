@@ -6,7 +6,6 @@ import './todo.scss';
 import { SiteContext } from '../../context/site.js';
 
 import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -18,6 +17,7 @@ const ToDo = (props) => {
 
   const [list, setList] = useState([]);
   const [updateList, startUpdateList] = useState([]);
+  const [change, triggerChange] = useState(false);
 
   const [create, read, update, remove] = useAjax(todoAPI);
 
@@ -26,9 +26,9 @@ const ToDo = (props) => {
     item.complete = false;
     console.log(item);
     create(item)
-      .then(results => {
-        console.log(results);
-        startUpdateList([...list, results.data.results])
+      .then(async results => {
+        startUpdateList([...updateList, results.data]);
+        triggerChange(!change);
       })
       .catch(console.error);
   };
@@ -39,8 +39,8 @@ const ToDo = (props) => {
       item.complete = !item.complete;
       update(item, item._id)
       .then((result) => {
-        console.log(result);
-        startUpdateList(list.map(listItem => listItem._id === item._id ? item : listItem))
+        startUpdateList(list.map(listItem => listItem._id === item._id ? item : listItem));
+        triggerChange(!change);
       })
     }
   };
@@ -49,40 +49,41 @@ const ToDo = (props) => {
     let item = list.filter(i => i._id === id)[0] || {};
     console.log('removing: ', id);
     await remove(id);
-    startUpdateList(list.map((listItem, index) => listItem._id === item._id ? list.splice(index, 1) : listItem))
+    startUpdateList(list.map((listItem, index) => listItem._id === item._id ? list.splice(index, 1) : listItem));
+    triggerChange(!change);
+  }
+
+  const filterData = (data) => {
+
+    return data.filter( i => {
+      console.log(i, i.complete);
+      return context.showCompleted ? i : i.complete === context.showCompleted
+    });
+  }
+
+  const sortData = (data) => {
+    return data.sort((a, b) => (a[context.sortType] >= b[context.sortType]) ? 1 : -1);
   }
 
   useEffect(() => {   // read from API storage once
     read().then(results => {
-      let newList = results.data.results.filter( i => {
-        return context.showCompleted ? i : i.complete === context.showCompleted
-      });
+      let newData = filterData(results.data.results)
+      newData = sortData(newData);
 
-      newList = newList.sort((a, b) => (a[context.sortType] > b[context.sortType]) ? 1 : -1);
-      startUpdateList(newList);
+      startUpdateList(newData);
+      setList(newData);
     });
   }, []);
 
   useEffect(() => { // re-render after changes detected
-    let newList = updateList.filter( i => {
-      return context.showCompleted ? i : i.complete === context.showCompleted
-    });
+    let newData = filterData(updateList)
+    newData = sortData(newData);
 
-    newList = newList.sort((a, b) => (a[context.sortType] > b[context.sortType]) ? 1 : -1);
-    setList(newList);
-  }, [updateList, context]);
+    setList(newData);
+  }, [context, change, updateList, props]);
 
     return (
-      <>
-        <header>
-          <Navbar bg="dark" variant="dark">
-            <Navbar.Brand href="#">React</Navbar.Brand>
-            <Nav className="mr-auto">
-              <Nav.Link href="#">Home</Nav.Link>
-            </Nav>
-          </Navbar>
-        </header>
-        
+      <>       
         <Container as="nav">
           <Row>
             <Col>
@@ -98,16 +99,14 @@ const ToDo = (props) => {
         </Container>
         <Container>
           <Row>
-            <section className="todo">
-              <Col sm={4}>
-                <TodoForm handleSubmit={addItem} />
-              </Col>
-              <Col sm={1}></Col>
-              <Col sm={6}>
-                <TodoList list={list} handleComplete={toggleComplete} handleDelete={deleteItem}/>
-              </Col>
-              <Col sm={3}></Col>
-            </section>
+            <Col sm={4} className="todo">
+              <TodoForm handleSubmit={addItem} />
+            </Col>
+            <Col sm={1}></Col>
+            <Col sm={6}>
+              <TodoList list={list} handleComplete={toggleComplete} handleDelete={deleteItem}/>
+            </Col>
+            <Col sm={3}></Col>
           </Row>
         </Container>
       </>
