@@ -21,6 +21,10 @@ const TodoList = (props) => {
       setActive(Number(e.target.text));
     }
 
+    const toggleShowCompleted = () => {
+      context.setShowCompleted(!context.showCompleted);
+    }
+
     const ReturnDate = (itemDate) => {
       if (itemDate) {
         itemDate = new Date(itemDate);
@@ -60,19 +64,14 @@ const TodoList = (props) => {
       );
     }
 
-    useEffect(() => {
-      console.log('toggling locally')
-      toggleCompleted(!showCompleted);
-    }, [context.showCompleted, props.list])
-
   return (
     <ListGroup>
       <div className='custom-control custom-switch'>
         <input type='checkbox' className='custom-control-input' id='customSwitches' readOnly
-        onChange={toggleShow}
+        onChange={toggleShowCompleted}
         />
         <label className='custom-control-label' htmlFor='customSwitches'>
-          {showCompleted ? "  Without completed" : "  With completed"}
+          {context.showCompleted ? "With completed" : "Without completed"}
           </label>
       </div>
       {list.map(item => (

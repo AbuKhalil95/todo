@@ -5,8 +5,6 @@ import cookie from 'react-cookies';
 
 export const AuthContext = React.createContext();
 
-const API = "http://localhost:5000";
-
 class AuthProvider extends React.Component {
 
     constructor(props) {
@@ -16,7 +14,8 @@ class AuthProvider extends React.Component {
             login: this.login,
             logout: this.logout,
             user: {},
-            isValidAction: this.isValidAction
+            isValidAction: this.isValidAction,
+            API: 'http://jadwalla.herokuapp.com'
         }
 
     }
@@ -39,7 +38,7 @@ class AuthProvider extends React.Component {
         try {
             
             const encodedData = base64.encode(`${username}:${password}`);
-            const result = await fetch(`${API}/signin`, {
+            const result = await fetch(`${this.state.API}/signin`, {
                 method: 'post',
                 mode: 'cors',
                 cache: 'no-cache',
