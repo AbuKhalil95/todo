@@ -1,6 +1,6 @@
 import React from 'react';
-import { AuthContext } from './context.js';
-import Show from '../show/show';
+import { AuthContext } from '../../context/auth.js';
+import Show from './show';
 
 class Login extends React.Component {
 
@@ -18,11 +18,19 @@ class Login extends React.Component {
         this.setState({ [e.target.name]: e.target.value });
     }
 
-    handleSubmit = e => {
+    handleSubmit = async e => {
         e.preventDefault();
         console.log(this.state)
         console.log("in handleSubmit")
-        this.context.login(this.state.username, this.state.password);
+        await this.context.login(this.state.username, this.state.password);
+        this.props.getAuth(this.context.loggedIn ? true : false);
+    }
+
+    handleLogout = e => {
+        console.log(this.state)
+        console.log("logging out")
+        this.context.logout();
+        this.props.getAuth(false);
     }
 
     render() {
@@ -31,7 +39,7 @@ class Login extends React.Component {
         return (
             <>
                 <Show condition={this.context.loggedIn}>
-                    <button>Logout</button>
+                    <button onClick={this.handleLogout}>Logout</button>
                 </Show>
                 <Show condition={!this.context.loggedIn}>
                     <form onSubmit={this.handleSubmit}>

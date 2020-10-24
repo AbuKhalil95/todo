@@ -5,7 +5,7 @@ import cookie from 'react-cookies';
 
 export const AuthContext = React.createContext();
 
-const API = "https://todoapi-ahmad.herokuapp.com/api/v1/user";
+const API = "http://localhost:5000";
 
 class AuthProvider extends React.Component {
 

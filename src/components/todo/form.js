@@ -6,12 +6,15 @@ import Button from 'react-bootstrap/Button';
 
 const TodoForm = (props) => {
 
-  const [item, setItem] = useState({});
+  // const [item, setItem] = useState({});
   const [handleSubmit, handleChange, values] = useForm(addItem);
 
   function addItem(item) {
+    item.timestamp = new Date();
+    if (!item.difficulty) {item.difficulty = 2};
+    console.log('added new date', item.timestamp);
     props.handleSubmit(item);
-    setItem({item});
+    // setItem({item});
   };
 
   return (

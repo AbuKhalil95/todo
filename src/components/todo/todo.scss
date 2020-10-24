@@ -9,6 +9,15 @@ nav.container {
     margin: 20px auto 40px auto;
 }
 
+@media all and (max-width: 992px) {
+    .row {
+        .col-sm-1, .col-sm-3 {
+            display: none;
+        }
+    }
+}
+
+
 .todo {
     width: 100%;
     display:flex;
@@ -17,12 +26,14 @@ nav.container {
     form {
         padding: 10px;
         border-radius: 10px;
+        width: 100%;
 
         label {
             margin-bottom: 1em;
         }
     }
 }
+
 .list-group-item {
     padding: 0;
     background-color: #fff;

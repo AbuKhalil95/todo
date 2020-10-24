@@ -1,32 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
 import ToDo from './components/todo/todo.js';
-import SiteContext from './context/site.js';
-import { AuthContext } from './context/auth.js';
 import Login from './components/login/login';
+import Show from './components/login/show';
+import {AuthContext} from './context/auth.js';
+import Navbar from 'react-bootstrap/Navbar';
+import Nav from 'react-bootstrap/Nav';
 
 export default () => {
-    const { context } = useContext(AuthContext);
-    let okToRender = false; 
+    const context = useContext(AuthContext);
+    const [okRender, setRender] = useState(context.loggedIn);
 
-    try {
-        okToRender = context.loggedIn
-    } catch(e) {
-        console.log("error in Auth component !")
+    const enableRender = (confirm) => {
+        if (confirm) {
+            setRender(true);
+        } else if (!confirm) {
+            setRender(false);
+        }
     }
 
+    useEffect(() => {
+        enableRender(context.loggedIn);
+    }, [context])
+
     return (
-    <SiteContext>
-        <If condition={okToRender}>
-            <Then>
-                <ToDo />
-            </Then>
-        </If>
-        <Else>
-            <When condition={!okToRender}>
-                <Login />
-            </When>
-        </Else>
-    </SiteContext>
+    <>
+        <header>
+          <Navbar bg="dark" variant="dark">
+            <Navbar.Brand href="#">React</Navbar.Brand>
+            <Nav className="mr-auto">
+              <Nav.Link href="#">Home</Nav.Link>
+              <Nav.Link href="#">Settings</Nav.Link>
+            </Nav>
+            <Navbar.Toggle />
+            <Navbar.Collapse className="justify-content-end">
+                <Navbar.Text>
+                    <Login getAuth={enableRender} />
+                </Navbar.Text>
+            </Navbar.Collapse>
+          </Navbar>
+        </header>
+        <Show condition={okRender}>
+            <ToDo />
+        </Show>
+    </>
     );
 }
