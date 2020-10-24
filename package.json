@@ -19,7 +19,6 @@
     "react-jsonschema-form": "1.8.1",
     "react-router-dom": "5.2.0",
     "react-scripts": "3.4.1",
-    "superagent": "^6.1.0",
     "uuid": "8.1.0"
   },
   "devDependencies": {},

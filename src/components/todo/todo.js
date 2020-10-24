@@ -10,10 +10,9 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-const todoAPI = 'https://abukhalil-api-backend.herokuapp.com/api/v1/todo';
-
 const ToDo = (props) => {
   const {context, toggleShow} = useContext(SiteContext);
+  const todoAPI = context.urlStorage;
 
   const [list, setList] = useState([]);
   const [updateList, startUpdateList] = useState([]);
