@@ -5,8 +5,6 @@ import cookie from 'react-cookies';
 
 export const AuthContext = React.createContext();
 
-const API = 'http://localhost:5000';
-
 class AuthProvider extends React.Component {
 
   constructor(props) {
@@ -17,6 +15,7 @@ class AuthProvider extends React.Component {
       logout: this.logout,
       user: {},
       isValidAction: this.isValidAction,
+      API: 'http://jadwalla.herokuapp.com',
     };
 
   }
@@ -39,7 +38,7 @@ class AuthProvider extends React.Component {
       try {
             
         const encodedData = base64.encode(`${username}:${password}`);
-        const result = await fetch(`${API}/signin`, {
+        const result = await fetch(`${this.state.API}/signin`, {
           method: 'post',
           mode: 'cors',
           cache: 'no-cache',
@@ -48,7 +47,6 @@ class AuthProvider extends React.Component {
 
         let res = await result.json();
         console.log('res: ',res);
-        // res has token {token: token, user: user};
         this.validateToken(res.token);
 
       } catch(e) {
@@ -57,22 +55,14 @@ class AuthProvider extends React.Component {
     }
 
     validateToken = (token)=> {
-      // validate token using jwt 
-      // we can use jwt.verify against secret-> .env
-      console.log('token >>> ',token);
-      let user = jwt.decode(token); // from docs its not very recommended .
-      console.log('user >>>> ',user);
-      // // jwt lets try without secret.
-      // // get user object
+      let user = jwt.decode(token);
       if (user) {
-        this.setAuthState(true, token, user);  // to set cookie and update state.
+        this.setAuthState(true, token, user);  
       } 
     }
 
     setAuthState = (loggedIn, token, user)=> {
-      console.log('here ');
-      cookie.save('auth', token);  // save token as a cookie in browser
-      //update conext with user object 
+      cookie.save('auth', token);  
       this.setState({loggedIn, user});
     }
 
@@ -82,7 +72,6 @@ class AuthProvider extends React.Component {
 
 
     componentDidMount() {
-      // get the cookie -> validate cookie -> of valid -> update the state 
       const cookieToken = cookie.load('auth');
       const token = cookieToken || null;
       this.validateToken(token);

@@ -8,41 +8,41 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 
 export default () => {
-    const context = useContext(AuthContext);
-    const [okRender, setRender] = useState(context.loggedIn);
+  const context = useContext(AuthContext);
+  const [okRender, setRender] = useState(context.loggedIn);
 
-    const enableRender = (confirm) => {
-        if (confirm) {
-            setRender(true);
-        } else if (!confirm) {
-            setRender(false);
-        }
+  const enableRender = (confirm) => {
+    if (confirm) {
+      setRender(true);
+    } else if (!confirm) {
+      setRender(false);
     }
+  };
 
-    useEffect(() => {
-        enableRender(context.loggedIn);
-    }, [context])
+  useEffect(() => {
+    enableRender(context.loggedIn);
+  }, [context]);
 
-    return (
+  return (
     <>
-        <header>
-          <Navbar bg="dark" variant="dark">
-            <Navbar.Brand href="#">React</Navbar.Brand>
-            <Nav className="mr-auto">
-              <Nav.Link href="#">Home</Nav.Link>
-              <Nav.Link href="#">Settings</Nav.Link>
-            </Nav>
-            <Navbar.Toggle />
-            <Navbar.Collapse className="justify-content-end">
-                <Navbar.Text>
-                    <Login getAuth={enableRender} />
-                </Navbar.Text>
-            </Navbar.Collapse>
-          </Navbar>
-        </header>
-        <Show condition={okRender}>
-            <ToDo />
-        </Show>
+      <header>
+        <Navbar bg="dark" variant="dark">
+          <Navbar.Brand href="#">React</Navbar.Brand>
+          <Nav className="mr-auto">
+            <Nav.Link href="#">Home</Nav.Link>
+            <Nav.Link href="#">Settings</Nav.Link>
+          </Nav>
+          <Navbar.Toggle />
+          <Navbar.Collapse className="justify-content-end">
+            <Navbar.Text>
+              <Login getAuth={enableRender} />
+            </Navbar.Text>
+          </Navbar.Collapse>
+        </Navbar>
+      </header>
+      <Show condition={okRender}>
+        <ToDo />
+      </Show>
     </>
-    );
-}
+  );
+};

@@ -14,7 +14,7 @@ const Main = () => {
       </SiteContext>
     </AuthContext>
   );
-}
+};
 
 const rootElement = document.getElementById('root');
 ReactDOM.render(<Main />, rootElement);

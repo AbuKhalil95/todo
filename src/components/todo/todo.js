@@ -10,10 +10,9 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-const todoAPI = 'https://abukhalil-api-backend.herokuapp.com/api/v1/todo';
-
 const ToDo = (props) => {
   const {context, toggleShow} = useContext(SiteContext);
+  const todoAPI = context.urlStorage;
 
   const [list, setList] = useState([]);
   const [updateList, startUpdateList] = useState([]);
@@ -38,10 +37,10 @@ const ToDo = (props) => {
     if (item._id) {
       item.complete = !item.complete;
       update(item, item._id)
-      .then((result) => {
-        startUpdateList(list.map(listItem => listItem._id === item._id ? item : listItem));
-        triggerChange(!change);
-      })
+        .then((result) => {
+          startUpdateList(list.map(listItem => listItem._id === item._id ? item : listItem));
+          triggerChange(!change);
+        });
     }
   };
 
@@ -51,23 +50,23 @@ const ToDo = (props) => {
     await remove(id);
     startUpdateList(list.map((listItem, index) => listItem._id === item._id ? list.splice(index, 1) : listItem));
     triggerChange(!change);
-  }
+  };
 
   const filterData = (data) => {
 
     return data.filter( i => {
       console.log(i, i.complete);
-      return context.showCompleted ? i : i.complete === context.showCompleted
+      return context.showCompleted ? i : i.complete === context.showCompleted;
     });
-  }
+  };
 
   const sortData = (data) => {
     return data.sort((a, b) => (a[context.sortType] >= b[context.sortType]) ? 1 : -1);
-  }
+  };
 
   useEffect(() => {   // read from API storage once
     read().then(results => {
-      let newData = filterData(results.data.results)
+      let newData = filterData(results.data.results);
       newData = sortData(newData);
 
       startUpdateList(newData);
@@ -76,41 +75,41 @@ const ToDo = (props) => {
   }, []);
 
   useEffect(() => { // re-render after changes detected
-    let newData = filterData(updateList)
+    let newData = filterData(updateList);
     newData = sortData(newData);
 
     setList(newData);
   }, [context, change, updateList, props]);
 
-    return (
-      <>       
-        <Container as="nav">
-          <Row>
-            <Col>
-              <Navbar bg="info" variant="secondary">
-                <section className="title">
-                  <h2>
+  return (
+    <>       
+      <Container as="nav">
+        <Row>
+          <Col>
+            <Navbar bg="info" variant="secondary">
+              <section className="title">
+                <h2>
                     To Do List Manager ({list.filter(item => !item.complete).length})
-                  </h2>
-                </section>
-              </Navbar>
-            </Col>
-          </Row>
-        </Container>
-        <Container>
-          <Row>
-            <Col sm={4} className="todo">
-              <TodoForm handleSubmit={addItem} />
-            </Col>
-            <Col sm={1}></Col>
-            <Col sm={6}>
-              <TodoList list={list} handleComplete={toggleComplete} handleDelete={deleteItem}/>
-            </Col>
-            <Col sm={3}></Col>
-          </Row>
-        </Container>
-      </>
-    );
-}
+                </h2>
+              </section>
+            </Navbar>
+          </Col>
+        </Row>
+      </Container>
+      <Container>
+        <Row>
+          <Col sm={4} className="todo">
+            <TodoForm handleSubmit={addItem} />
+          </Col>
+          <Col sm={1}></Col>
+          <Col sm={6}>
+            <TodoList list={list} handleComplete={toggleComplete} handleDelete={deleteItem}/>
+          </Col>
+          <Col sm={3}></Col>
+        </Row>
+      </Container>
+    </>
+  );
+};
 
 export default ToDo;
